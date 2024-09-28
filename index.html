@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- displays site properly based on user's device -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+  <link rel="icon" type="image/png" sizes="32x32" href="./images/favicon-32x32.png">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            clifford: '#da373d',
+          }
+        }
+      }
+    }
+  </script>
+  <style type="text/tailwindcss">
+    @layer utilities {
+      .content-auto {
+        content-visibility: auto;
+      }
+
+      .boxModel {
+        box-sizing: border-box;
+      }
+      .desktop{
+        font-size: small;
+        font-weight: 700;
+        color: rgb(155, 155, 155);
+        width: 20%;
+        display: flex;
+        flex-direction: column;
+        border-right: 1px solid rgb(185, 185, 185);
+        padding: 2px;
+      }
+      .mobile{
+        font-size: small;
+        font-weight: 700;
+        color: rgb(155, 155, 155);
+        display: flex;
+        flex-direction: column;
+      }
+      
+    }
+  </style>
+  
+  <title>Frontend Mentor | IP Address Tracker</title>
+
+  <!-- Feel free to remove these styles or customise in your own stylesheet 👍 -->
+  <style>
+    .attribution { font-size: 11px; text-align: center; }
+    .attribution a { color: hsl(228, 45%, 44%); }
+  </style>
+</head>
+<body >
+
+  <div class="container flex flex-col items-center m-0 m-auto main ">
+    <div class="top z-0 bg-[url('/images/pattern-bg-desktop.png')] flex flex-col gap-10 items-center pt-4 pb-16 text-white top w-full">
+      <h3>IP Address Tracker</h3>
+      <div class="searchBox w-1/2 relative">
+        <input type="search" class="serchInput text-black m-r-0 p-2 rounded-lg serchInput w-full" placeholder="Search for any IP address or domain">
+        <button class="searchBtn absolute bg-black m-0 p-2 right-0 rounded-r-lg searchBtn text-white top-0 w-[40px]"> > </button>
+      </div>
+      
+    </div>
+    
+    <div class="absolute bg-white flex flex-col w-2/3 gap-10 items-center h-auto justify-evenly py-4 shadow-md resultBox rounded-lg top-[25%] md:flex-row md:h-24 md:w-[80%] z-30">
+      <div class="mobile md:desktop"><lable>IP Address</lable><label id="searched_Ip"></label></div>
+      <div class="mobile md:desktop"><lable>Location</lable><label id="searched_Location"></label></div>
+      <div class="mobile md:desktop"><label>Timezone UTC</label><label id="searched_TimeZone"></label></div><!-- add offset value dynamically using the API -->
+      <div class="mobile md:desktop"><label>ISP</label><label id="searched_Isp"></label></div>
+    </div>
+  <div id="map" class="z-0" style="width: 100%; height: 400px;"></div>
+    
+    <footer class="attribution">
+      Challenge by <a href="https://www.frontendmentor.io?ref=challenge" target="_blank">Frontend Mentor</a>. 
+      Coded by <a href="#">Your Name Here</a>.
+    </footer>
+  </div>
+
+
+<script>
+  const searchBtn=document.querySelector('.searchBtn');
+  const ipAdress=document.querySelector('.serchInput');
+  const searched_Ip=document.getElementById('searched_Ip');
+  const searched_Location=document.getElementById('searched_Location');
+  const searched_Timezone=document.getElementById('searched_TimeZone');
+  const searched_Isp=document.getElementById('searched_Isp');
+
+  const apikey="at_Y4WcJkVaUEFjR1dpYclOscoa6sPNR";
+  const url=` https://geo.ipify.org/api/v2/country,city?apiKey=${apikey}&ip=${ipAdress}`;
+
+  searchBtn.addEventListener('click',(e)=>{
+      e.preventDefault();
+      if(ipAdress.value!='' && ipAdress.value!=null){
+      fetch(url).then(response=>{
+        if(!response.ok){
+          throw new Error('network response was not ok');
+        }
+       return response.json();})
+      .then(data=>{
+        searched_Ip.innerHTML=data.ip;
+        searched_Location.innerHTML=`${data.location.city} ${data.location.country}`;
+        searched_Timezone.innerHTML=data.location.timezone;
+        searched_Isp.innerHTML=data.isp;
+        
+        updateMap([data.location.lat,data.location.lng]);
+      })
+      .catch(error=>{consol.error('error',error);});
+    }
+    else{
+      alert('please enter an ip');
+    }
+  })
+
+  var map = L.map('map').setView([0,0], 13);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  }).addTo(map);
+
+  var marker = L.marker([51.5, -0.09]).addTo(map);
+  marker.bindPopup("<b>Hello world!</b><br>I am a popup.").openPopup();
+
+ const  updateMap=(current_location=[-33.665, 18.993])=> {
+  map.setView(current_location,13);
+  marker=L.marker(current_location).addTo(map)
+  marker.bindPopup("<b>Hello world!</b><br>I am a popup.").openPopup();
+ }
+
+</script>
+</body>
+</html>
